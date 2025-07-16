@@ -1,5 +1,6 @@
 package com.yoga.youjia.service;
 
+import com.yoga.youjia.dto.request.RegisterRequestDTO;
 import com.yoga.youjia.entity.User;
 import com.yoga.youjia.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,12 +9,12 @@ import org.springframework.stereotype.Service;
 
 /**
  * 认证服务类
- * 
+ *
  * 这个类专门负责处理用户认证相关的业务逻辑，包括：
  * - 用户注册
  * - 用户登录
  * - 密码验证
- * 
+ *
  * 为什么要单独创建AuthService？
  * 1. 职责分离：认证逻辑和用户管理逻辑分开
  * 2. 代码组织：让每个Service类的职责更加明确
@@ -25,7 +26,7 @@ public class AuthService {
 
     /**
      * 用户数据访问对象
-     * 
+     *
      * 用于操作用户数据，比如查询用户、保存用户等
      */
     @Autowired  // 让Spring自动注入UserRepository
@@ -39,15 +40,16 @@ public class AuthService {
     @Autowired  // 让Spring自动注入PasswordEncoder
     private PasswordEncoder passwordEncoder;
 
+
     /**
      * 用户注册方法
-     * 
+     *
      * 处理用户注册的完整流程：
      * 1. 检查用户名是否已存在
      * 2. 检查邮箱是否已存在
      * 3. 设置用户默认信息
      * 4. 保存用户到数据库
-     * 
+     *
      * @param user 要注册的用户信息
      * @return User 注册成功后的用户对象
      * @throws IllegalArgumentException 当用户名或邮箱已存在时抛出
@@ -71,7 +73,11 @@ public class AuthService {
         // 第四步：设置用户默认信息
         user.setStatus(User.Status.ENABLE.getDescription());  // 设置状态为启用
         user.setRole(User.Roles.USER.getDescription());       // 设置角色为普通用户
-        user.setCreatedAt(java.time.LocalDateTime.now());     // 设置创建时间
+        user.setCreatedAt(java.time.LocalDateTime.now());
+        // 如果realName不为空，去除首尾空格
+        if (user.getRealName() != null &&!user.getRealName().trim().isEmpty()) {
+            user.setRealName(user.getRealName().trim());
+        }
 
         // 第五步：保存用户到数据库
         return userRepository.save(user);
@@ -79,16 +85,16 @@ public class AuthService {
 
     /**
      * 用户登录方法
-     * 
+     *
      * 验证用户的登录凭据（用户名和密码）
-     * 
+     *
      * 登录流程：
      * 1. 根据用户名查找用户
      * 2. 检查用户是否存在
      * 3. 验证密码是否正确
      * 4. 检查用户状态是否为启用
      * 5. 返回登录成功的用户信息
-     * 
+     *
      * @param username 用户名
      * @param password 密码
      * @return User 登录成功的用户对象

@@ -78,7 +78,7 @@ public class ApiResponse<T> {
      * @return 错误的响应对象
      */
     public static <T> ApiResponse<T> error(ResultCode resultCode, String errorMsg) {
-        return error(String.valueOf(resultCode.getCode()), errorMsg);
+        return error(String.valueOf(resultCode.getCode()), "请求错误: " + errorMsg);
     }
 }
 

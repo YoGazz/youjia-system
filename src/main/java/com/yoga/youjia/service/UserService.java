@@ -1,8 +1,11 @@
 package com.yoga.youjia.service;
+import com.yoga.youjia.dto.request.UserQueryDTO;
 import com.yoga.youjia.entity.User;
 import com.yoga.youjia.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
@@ -57,6 +60,7 @@ public class UserService {
      *
      * @param user 用户信息
      * @return 更新后的用户信息
+     * @Transactional 注解表示这个方法是一个事务方法，
      */
 
     @Transactional
@@ -88,6 +92,9 @@ public class UserService {
         if (user.getEmail() != null) {
             existingUser.setEmail(user.getEmail());
         }
+        if (user.getRealName() != null) {
+            existingUser.setRealName(user.getRealName());
+        }
         if (user.getStatus() != null) {
             existingUser.setStatus(user.getStatus());
         }
@@ -103,6 +110,29 @@ public class UserService {
         logger.info("用户保存成功: {}", savedUser.getId());
 
         return savedUser;
+    }
+
+    /**
+     * 条件分页查询用户
+     *
+     * @param queryDTO 查询条件
+     * @return 分页用户列表
+     */
+    public Page<User> getUsersByConditions(UserQueryDTO queryDTO) {
+        // 创建分页请求，页码从0开始，按ID降序排序
+        PageRequest pageRequest = PageRequest.of(
+                queryDTO.getPage() - 1,
+                queryDTO.getSize(),
+                Sort.by(Sort.Direction.DESC, "id")
+        );
+
+        // 调用Repository的条件查询方法
+        return userRepository.findByConditions(
+                queryDTO.getRealName(),
+                queryDTO.getStatus(),
+                queryDTO.getRole(),
+                pageRequest
+        );
     }
 
     /**

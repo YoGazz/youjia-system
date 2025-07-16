@@ -32,6 +32,9 @@ public class RegisterRequestDTO {
     @NotBlank(message = "确认密码不能为空")
     private String confirmPassword;
 
+    @Size(min = 1, max = 20, message = "真实姓名长度必须在1到20之间")
+    private String realName;
+
     @NotBlank(message = "邮箱不能为空")
     @Email(message = "邮箱格式不正确")
     private String email;

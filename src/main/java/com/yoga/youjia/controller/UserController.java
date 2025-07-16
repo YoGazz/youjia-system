@@ -1,5 +1,7 @@
 package com.yoga.youjia.controller;
 import com.yoga.youjia.common.ApiResponse;
+import com.yoga.youjia.dto.request.UserQueryDTO;
+import com.yoga.youjia.dto.response.PageResponseDTO;
 import com.yoga.youjia.dto.response.UserResponseDTO;
 import com.yoga.youjia.entity.User;
 import com.yoga.youjia.service.UserService;
@@ -8,7 +10,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.data.domain.Page;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户控制器类
@@ -99,4 +103,42 @@ public class UserController {
             return ApiResponse.error("500", "更新用户信息失败: " + e.getMessage());
         }
     }
+
+    /**
+     * 条件分页查询用户列表
+     *
+     * @param queryDTO 查询条件
+     * @return 分页用户列表
+     */
+    @Operation(summary = "条件分页查询用户", description = "根据姓名、状态、角色等条件查询用户列表")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "查询成功"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "查询失败")
+    })
+    @PostMapping("/search")  // 修改为POST请求，并使用专用路径
+    public ApiResponse<PageResponseDTO<UserResponseDTO>> getUsersByConditions(@RequestBody UserQueryDTO queryDTO) {  // 添加@RequestBody
+        try {
+            // 调用Service查询用户
+            Page<User> userPage = userService.getUsersByConditions(queryDTO);
+
+            // 转换为DTO
+            List<UserResponseDTO> userDTOs = userPage.getContent().stream()
+                    .map(UserResponseDTO::from)
+                    .collect(Collectors.toList());
+
+            // 构建分页响应
+            PageResponseDTO<UserResponseDTO> pageResponse = new PageResponseDTO<>(
+                    userDTOs,
+                    userPage.getTotalElements(),
+                    userPage.getTotalPages(),
+                    userPage.getNumber() + 1,
+                    userPage.getSize()
+            );
+
+            return ApiResponse.success(pageResponse);
+        } catch (Exception e) {
+            return ApiResponse.error("500", "查询用户列表失败: " + e.getMessage());
+        }
+    }
+
 }

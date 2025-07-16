@@ -120,6 +120,17 @@ public class User {
     private String password;
 
     /**
+     * 用户真实姓名
+     *
+     * 用户的真实姓名，用于：
+     * - 个人信息展示
+     */
+
+    @Column(length = 20)  // 限制真实姓名长度为20个字符
+    @Size(min = 1, max = 20, message = "真实姓名长度必须在1到20之间")  // 验证真实姓名长度
+    private String realName;
+
+    /**
      * 用户邮箱
      *
      * 用户的电子邮箱地址，用于：
@@ -278,6 +289,27 @@ public class User {
         public String getDescription() {
             return description;
         }
+
+        /**
+         * 根据代码获取角色描述
+         *
+         * @param codeStr 角色代码
+         * @return 角色的中文描述，如果代码无效则返回null
+         */
+        public static String getDescriptionByCode(String codeStr) {
+            try {
+                int code = Integer.parseInt(codeStr);
+                for (Roles role : Roles.values()) {
+                    if (role.getCode() == code) {
+                        return role.getDescription();
+                    }
+                }
+            } catch (NumberFormatException e) {
+                // 如果代码不是数字格式，返回null
+                return codeStr;
+            }
+            return codeStr;
+        }
     }
 
     /**
@@ -328,10 +360,10 @@ public class User {
 
         /**
          * 枚举构造函数
-         *
+         * <p>
          * 初始化状态枚举的代码和描述。
          *
-         * @param code 状态代码
+         * @param code        状态代码
          * @param description 状态描述
          */
         Status(int code, String description) {
@@ -356,8 +388,28 @@ public class User {
         public String getDescription() {
             return description;
         }
-    }
 
+        /**
+         * 根据代码获取状态描述
+         *
+         * @param codeStr 状态代码
+         * @return 状态的中文描述，如果代码无效则返回null
+         */
+        public static String getDescriptionByCode(String codeStr) {
+            try {
+                int code = Integer.parseInt(codeStr);
+                for (Status status : Status.values()) {
+                    if (status.getCode() == code) {
+                        return status.getDescription();
+                    }
+                }
+            } catch (NumberFormatException e) {
+                // 如果代码不是数字格式，返回null
+                return codeStr;
+            }
+            return codeStr;
+        }
+    }
 }
 
 
