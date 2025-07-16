@@ -4,6 +4,9 @@ import com.yoga.youjia.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -27,6 +30,8 @@ import java.util.List;
           // 4. 是@Component注解的特化版本，专门用于Service层
 public class UserService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
     @Autowired
     private UserRepository userRepository;
 
@@ -34,12 +39,15 @@ public class UserService {
      * 获取用户信息
      *
      * 根据用户ID查询用户信息
-     *
+     * 如果用户不存在，抛出异常
+     * orElseThrow方法用于在查询不到用户时抛出异常
+     * IllegalArgumentException是一个运行时异常，
      * @param UserId 用户ID
      * @return 用户信息
      */
     public User getUserById(Long UserId){
-        return userRepository.findById(UserId).get();
+        return userRepository.findById(UserId)
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
     }
 
     /**
@@ -51,9 +59,50 @@ public class UserService {
      * @return 更新后的用户信息
      */
 
+    @Transactional
     public User updateUser(User user) {
-        // 这里可以添加一些业务逻辑，比如验证用户信息等
-        return userRepository.save(user);
+        logger.info("开始更新用户: {}", user.getId());
+
+        // 先检查用户是否存在
+        User existingUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+
+        // 检查邮箱是否被其他用户使用
+        if (user.getEmail() != null && !user.getEmail().equals(existingUser.getEmail())) {
+            if (userRepository.existsByEmail(user.getEmail())) {
+                throw new IllegalArgumentException("邮箱已被其他用户使用");
+            }
+        }
+
+        // 检查用户名是否被其他用户使用
+        if (user.getUsername() != null && !user.getUsername().equals(existingUser.getUsername())) {
+            if (userRepository.existsByUsername(user.getUsername())) {
+                throw new IllegalArgumentException("用户名已被其他用户使用");
+            }
+        }
+
+        // 更新字段（只更新非空字段）
+        if (user.getUsername() != null) {
+            existingUser.setUsername(user.getUsername());
+        }
+        if (user.getEmail() != null) {
+            existingUser.setEmail(user.getEmail());
+        }
+        if (user.getStatus() != null) {
+            existingUser.setStatus(user.getStatus());
+        }
+        if (user.getRole() != null) {
+            existingUser.setRole(user.getRole());
+        }
+        if (user.getAvatar() != null) {
+            existingUser.setAvatar(user.getAvatar());
+        }
+
+        logger.info("准备保存用户: {}", existingUser.getId());
+        User savedUser = userRepository.save(existingUser);
+        logger.info("用户保存成功: {}", savedUser.getId());
+
+        return savedUser;
     }
 
     /**

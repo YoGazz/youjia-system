@@ -4,6 +4,7 @@ import com.yoga.youjia.dto.response.UserResponseDTO;
 import com.yoga.youjia.entity.User;
 import com.yoga.youjia.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -43,12 +44,10 @@ public class UserController {
     @io.swagger.v3.oas.annotations.responses.ApiResponses(
             value = {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "200",
-                            description = "查询成功，返回用户信息"
+                            responseCode = "200", description = "查询成功，返回用户信息"
                     ),
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "401",
-                            description = "用户不存在或查询失败"
+                            responseCode = "401", description = "用户不存在或查询失败"
                     )
             }
     )
@@ -63,6 +62,41 @@ public class UserController {
             return ApiResponse.success(userResponseDTO);
         }catch (Exception e){
             return ApiResponse.error("401","用户不存在或查询失败");
+        }
+    }
+
+    /**
+     * 更新用户信息
+     * 根据用户ID更新用户信息
+     * @param userId 用户ID
+     * @param user 用户信息
+     * @Operation 注解用于描述API操作
+     * @ApiResponses 注解用于描述API响应
+     * @PutMapping 注解用于处理PUT请求
+     * @PathVariable 注解用于从URL路径中获取参数
+     * @RequestBody 注解用于获取请求体中的数据
+     */
+    @Operation(summary = "更新用户信息", description = "根据用户ID更新用户信息")
+    @ApiResponses(
+            value = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "200", description = "更新成功，返回更新后的用户信息"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "500", description = "更新用户信息失败")
+            }
+    )
+    @PutMapping("/{userId}")
+    public ApiResponse<UserResponseDTO> updateUser(@PathVariable Long userId, @RequestBody User user){
+        try{
+            // 设置用户ID，确保更新的是正确的用户
+            user.setId(userId);
+            // 调用UserService更新用户信息
+            User updateUser = userService.updateUser(user);
+            // 将更新后的User实体转换为UserResponseDTO
+            UserResponseDTO userResponseDTO = UserResponseDTO.from(updateUser);
+            return ApiResponse.success(userResponseDTO);
+        }catch (Exception e){
+            return ApiResponse.error("500", "更新用户信息失败: " + e.getMessage());
         }
     }
 }
