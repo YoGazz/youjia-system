@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 public class UserResponseDTO {
     private Long id;
     private String username;
+    private String realName;
     private String email;
     private String status; // 用户状态（如：激活、未激活、禁用等）
     private String role; // 用户角色（如：管理员、普通用户等）
@@ -52,8 +53,10 @@ public class UserResponseDTO {
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
-                .status(user.getStatus())
-                .role(user.getRole())
+                .realName(user.getRealName())
+                // 使用User.Status和User.Roles的getDescriptionByCode方法获取状态和角色描述
+                .status(User.Status.getDescriptionByCode(user.getStatus()))
+                .role(User.Roles.getDescriptionByCode(user.getRole()))
                 .createdAt(user.getCreatedAt())
                 .build();
     }
