@@ -1,60 +1,178 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Maven项目对象模型(POM - Project Object Model)配置文件
+
+    这是Maven项目的核心配置文件，定义了项目的基本信息、依赖关系、构建配置等。
+    Maven是Java生态系统中最流行的项目管理和构建工具。
+
+    主要功能：
+    1. 项目信息管理（groupId、artifactId、version）
+    2. 依赖管理（自动下载和管理第三方库）
+    3. 构建配置（编译、打包、测试等）
+    4. 插件管理（扩展Maven功能）
+
+    项目技术栈：
+    - Spring Boot 3.0.2 (主框架)
+    - Spring Data JPA (数据访问)
+    - MySQL + H2 (数据库)
+    - Lombok (代码简化)
+    - Bean Validation (数据验证)
+    - Spring Security (安全框架)
+    - JWT (身份认证)
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <!-- Maven POM模型版本，固定为4.0.0 -->
     <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        项目坐标信息 (GAV坐标)
+        Maven使用这三个元素唯一标识一个项目
+    -->
+    <!-- 组织或公司标识，通常使用反向域名 -->
     <groupId>com.yoga</groupId>
+
+    <!-- 项目标识，项目的唯一名称 -->
     <artifactId>youjia</artifactId>
+
+    <!-- 项目版本号，SNAPSHOT表示开发版本 -->
     <version>0.0.1-SNAPSHOT</version>
+
+    <!-- 项目名称，用于文档和报告 -->
     <name>youjia</name>
+
+    <!-- 项目描述 -->
     <description>youjia</description>
+    <!--
+        项目属性配置
+        定义项目中使用的各种属性值，可以在其他地方通过${属性名}引用
+    -->
     <properties>
+        <!-- Java版本，指定项目使用的Java版本 -->
         <java.version>17</java.version>
+
+        <!-- 项目源码编码格式，确保中文等字符正确显示 -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- 项目报告输出编码格式 -->
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Spring Boot版本号，统一管理Spring Boot相关依赖的版本 -->
         <spring-boot.version>3.0.2</spring-boot.version>
     </properties>
+    <!--
+        项目依赖配置
+        Maven会自动下载这些依赖包及其传递依赖
+        Spring Boot Starter是预配置的依赖包，包含了相关功能所需的所有依赖
+    -->
     <dependencies>
+        <!-- Spring Boot JDBC启动器：提供数据库连接和JDBC操作功能 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
+
+        <!-- Spring Boot 数据验证启动器：提供Bean Validation功能 -->
+        <!-- 包含Hibernate Validator，用于验证请求参数 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+
+        <!-- Spring Boot Web启动器：提供Web开发所需的核心功能 -->
+        <!-- 包含Spring MVC、内嵌Tomcat服务器、JSON处理等 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- MySQL数据库驱动：用于连接MySQL数据库 -->
+        <!-- scope=runtime表示只在运行时需要，编译时不需要 -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- H2内存数据库：用于开发和测试环境 -->
+        <!-- 优势：无需安装，启动快速，适合开发调试 -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- Lombok：Java代码简化工具 -->
+        <!-- 通过注解自动生成getter、setter、toString等方法 -->
+        <!-- optional=true表示这个依赖不会传递给依赖此项目的其他项目 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.30</version>
             <optional>true</optional>
         </dependency>
+
+        <!-- Spring Boot 测试启动器：提供单元测试和集成测试功能 -->
+        <!-- scope=test表示只在测试时使用，不会打包到最终的jar中 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Spring Boot JPA启动器：提供JPA数据访问功能 -->
+        <!-- 包含Hibernate ORM框架，简化数据库操作 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+
+        <!-- Spring Boot Security启动器：提供安全认证和授权功能 -->
+        <!-- 包含身份验证、权限控制、密码加密等安全特性 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- JWT (JSON Web Token) 相关依赖 -->
+        <!-- JWT API：定义JWT的核心接口和类 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+
+        <!-- JWT 实现：提供JWT的具体实现 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+
+        <!-- JWT Jackson支持：用于JWT的JSON序列化和反序列化 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+
+        <!-- Knife4j：API文档生成工具 -->
+        <!-- 基于OpenAPI 3.0，提供美观的API文档界面 -->
+        <!-- 可以通过 /doc.html 访问API文档 -->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+            <version>4.4.0</version>
+        </dependency>
     </dependencies>
+    <!--
+        依赖管理配置
+        用于统一管理项目中所有依赖的版本，确保版本一致性
+        子模块可以继承这里定义的版本，无需重复指定
+    -->
     <dependencyManagement>
         <dependencies>
+            <!-- Spring Boot 依赖管理BOM (Bill of Materials) -->
+            <!-- 导入Spring Boot的依赖版本管理，确保所有Spring Boot相关依赖版本兼容 -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -103,4 +221,5 @@
         </plugins>
     </build>
 
+<!-- 项目配置结束 -->
 </project>

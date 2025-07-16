@@ -3,6 +3,7 @@ package com.yoga.youjia.service;
 import com.yoga.youjia.entity.User;
 import com.yoga.youjia.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,6 +32,14 @@ public class AuthService {
     private UserRepository userRepository;
 
     /**
+     * 密码加密器
+     *
+     * 用于加密用户密码，确保密码安全存储
+     */
+    @Autowired  // 让Spring自动注入PasswordEncoder
+    private PasswordEncoder passwordEncoder;
+
+    /**
      * 用户注册方法
      * 
      * 处理用户注册的完整流程：
@@ -54,12 +63,17 @@ public class AuthService {
             throw new IllegalArgumentException("邮箱已存在");
         }
 
-        // 第三步：设置用户默认信息
+        // 第三步：加密密码
+        // 使用BCrypt加密算法对密码进行加密
+        // 加密后的密码无法被逆向解密，确保安全性
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // 第四步：设置用户默认信息
         user.setStatus(User.Status.ENABLE.getDescription());  // 设置状态为启用
         user.setRole(User.Roles.USER.getDescription());       // 设置角色为普通用户
         user.setCreatedAt(java.time.LocalDateTime.now());     // 设置创建时间
 
-        // 第四步：保存用户到数据库
+        // 第五步：保存用户到数据库
         return userRepository.save(user);
     }
 
@@ -91,9 +105,9 @@ public class AuthService {
         }
 
         // 第三步：验证密码是否正确
-        // 注意：这里是简单的明文密码比较
-        // 实际项目中应该使用加密密码比较（如BCrypt）
-        if (!password.equals(user.getPassword())) {
+        // 使用BCrypt密码加密器验证密码
+        // passwordEncoder.matches()会将明文密码与数据库中的加密密码进行比较
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("用户名或密码错误");
         }
 
@@ -108,70 +122,9 @@ public class AuthService {
         return user;
     }
 
-    /**
-     * 根据邮箱登录
-     * 
-     * 支持用户使用邮箱进行登录
-     * 
-     * @param email 邮箱地址
-     * @param password 密码
-     * @return User 登录成功的用户对象
-     * @throws IllegalArgumentException 当登录失败时抛出
-     */
-    public User loginByEmail(String email, String password) {
-        // 根据邮箱查找用户
-        User user = userRepository.findByEmail(email)
-                .orElse(null);
-
-        // 检查用户是否存在
-        if (user == null) {
-            throw new IllegalArgumentException("邮箱或密码错误");
-        }
-
-        // 验证密码
-        if (!password.equals(user.getPassword())) {
-            throw new IllegalArgumentException("邮箱或密码错误");
-        }
-
-        // 检查用户状态
-        if (!User.Status.ENABLE.getDescription().equals(user.getStatus())) {
-            throw new IllegalArgumentException("用户账户已被禁用");
-        }
-
-        // 清除密码并返回用户信息
-        user.setPassword(null);
-        return user;
-    }
-
-    /**
-     * 检查用户名是否可用
-     * 
-     * 用于注册时的实时验证
-     * 
-     * @param username 要检查的用户名
-     * @return boolean true表示可用，false表示已存在
-     */
-    public boolean isUsernameAvailable(String username) {
-        return !userRepository.existsByUsername(username);
-    }
-
-    /**
-     * 检查邮箱是否可用
-     * 
-     * 用于注册时的实时验证
-     * 
-     * @param email 要检查的邮箱
-     * @return boolean true表示可用，false表示已存在
-     */
-    public boolean isEmailAvailable(String email) {
-        return !userRepository.existsByEmail(email);
-    }
-
     // TODO: 后续可以添加的功能
-    // - 密码加密和验证
-    // - JWT令牌生成和验证
+    // - JWT令牌生成和验证（已在AuthController中实现）
     // - 找回密码功能
     // - 邮箱验证功能
-    // - 登录日志记录
     // - 登录失败次数限制
 }
