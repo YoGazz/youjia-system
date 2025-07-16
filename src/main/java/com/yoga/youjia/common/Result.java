@@ -1,4 +1,4 @@
 package com.yoga.youjia.common;
 
-public class ApiResponse {
+public class Result {
 }
