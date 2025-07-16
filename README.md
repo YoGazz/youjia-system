@@ -1,6 +1,6 @@
-# 瑜伽管理系统 (Youjia Yoga System)
+# 佑珈测试管理系统 (Youjia System)
 
-一个基于Spring Boot的瑜伽管理系统，提供用户注册、登录、JWT认证等功能。
+一个基于Spring Boot的佑珈测试管理系统，提供用户注册、登录、JWT认证等功能。
 
 ## 📋 项目简介
 
