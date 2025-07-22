@@ -57,22 +57,7 @@ public class YoujiaApplication {
      *             - 例如：--spring.profiles.active=prod (激活生产环境配置)
      */
     public static void main(String[] args) {
-        // SpringApplication.run()方法的作用：
-        // 1. 创建SpringApplication实例
-        // 2. 推断应用类型(Web应用、响应式应用或普通应用)
-        // 3. 加载所有的ApplicationContextInitializer
-        // 4. 加载所有的ApplicationListener
-        // 5. 推断主配置类
-        // 6. 启动应用程序
-        //
-        // 参数说明：
-        // - YoujiaApplication.class: 主配置类，告诉Spring Boot从哪里开始扫描
-        // - args: 命令行参数，会传递给Spring Boot进行处理
         SpringApplication.run(YoujiaApplication.class, args);
-
-        // 当这行代码执行完成后，应用程序就已经启动完毕
-        // 可以通过 http://localhost:8080 访问应用程序
-        // 如果启用了H2控制台，可以通过 http://localhost:8080/h2-console 访问数据库
     }
 
 }

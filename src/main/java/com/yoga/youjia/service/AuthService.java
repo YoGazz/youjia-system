@@ -1,6 +1,5 @@
 package com.yoga.youjia.service;
 
-import com.yoga.youjia.dto.request.RegisterRequestDTO;
 import com.yoga.youjia.entity.User;
 import com.yoga.youjia.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,8 +70,8 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // 第四步：设置用户默认信息
-        user.setStatus(User.Status.ENABLE.getDescription());  // 设置状态为启用
-        user.setRole(User.Roles.USER.getDescription());       // 设置角色为普通用户
+        user.setStatus(User.Status.ENABLE.name());            // 存储枚举名称
+        user.setRole(User.Roles.DEVELOPER.getCode());         // 存储code
         user.setCreatedAt(java.time.LocalDateTime.now());
         // 如果realName不为空，去除首尾空格
         if (user.getRealName() != null &&!user.getRealName().trim().isEmpty()) {
@@ -118,7 +117,7 @@ public class AuthService {
         }
 
         // 第四步：检查用户状态是否为启用
-        if (!User.Status.ENABLE.getDescription().equals(user.getStatus())) {
+        if (!User.Status.ENABLE.name().equals(user.getStatus())) {
             throw new IllegalArgumentException("用户账户已被禁用");
         }
 
