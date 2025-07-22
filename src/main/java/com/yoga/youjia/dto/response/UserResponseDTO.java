@@ -32,6 +32,7 @@ public class UserResponseDTO {
     private String realName;
     private String email;
     private String status; // 用户状态（如：激活、未激活、禁用等）
+    private String statusLabel; // 用户状态的中文描述
     private String role; // 用户角色（如：管理员、普通用户等）
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -54,10 +55,10 @@ public class UserResponseDTO {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .realName(user.getRealName())
-                // 使用User.Status和User.Roles的getDescriptionByCode方法获取状态和角色描述
-                .status(User.Status.getDescriptionByCode(user.getStatus()))
-                .role(User.Roles.getDescriptionByCode(user.getRole()))
+                .status(User.Status.getDescriptionByName(user.getStatus()))  // 枚举名称转中文
+                .role(User.Roles.getNameByCode(user.getRole()))              // code转中文
                 .createdAt(user.getCreatedAt())
                 .build();
     }
+
 }
