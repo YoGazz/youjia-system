@@ -73,9 +73,12 @@ public class AuthService {
         user.setStatus(User.Status.ENABLE.name());            // 存储枚举名称
         user.setRole(User.Roles.DEVELOPER.getCode());         // 存储code
         user.setCreatedAt(java.time.LocalDateTime.now());
-        // 如果realName不为空，去除首尾空格
-        if (user.getRealName() != null &&!user.getRealName().trim().isEmpty()) {
+        // 如果realName不为空且不是空白字符串，去除首尾空格
+        if (user.getRealName() != null && !user.getRealName().trim().isEmpty()) {
             user.setRealName(user.getRealName().trim());
+        } else {
+            // 如果realName为空或空白，设置为null
+            user.setRealName(null);
         }
 
         // 第五步：保存用户到数据库

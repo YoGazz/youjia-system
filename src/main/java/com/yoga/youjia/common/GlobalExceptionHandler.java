@@ -57,7 +57,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception e) {
+        // 记录完整异常信息到日志
+        e.printStackTrace();
+        
+        // 避免向客户端泄露敏感异常信息
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("500", "系统错误: " + e.getMessage()));
+                .body(ApiResponse.error("500", "系统内部错误，请联系管理员"));
     }
 }

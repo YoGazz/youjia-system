@@ -76,28 +76,22 @@ public class JWTService {
     /**
      * 从JWT令牌中提取用户名
      *
-     * @param token JWT令牌
+     * @param token JWT令牌（可以包含或不包含Bearer前缀）
      * @return 用户名
      */
     public String extractUsername(String token) {
-        // 如果令牌以"Bearer "开头，则移除这个前缀
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
+        token = removeBearer(token);
         return extractClaim(token, Claims::getSubject);
     }
 
     /**
      * 从JWT令牌中提取过期时间
      *
-     * @param token JWT令牌
+     * @param token JWT令牌（可以包含或不包含Bearer前缀）
      * @return 过期时间
      */
     public Date extractExpiration(String token) {
-        // 如果令牌以"Bearer "开头，则移除这个前缀
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
+        token = removeBearer(token);
         return extractClaim(token, Claims::getExpiration);
     }
 
@@ -141,16 +135,12 @@ public class JWTService {
     /**
      * 验证JWT令牌
      *
-     * @param token JWT令牌
+     * @param token JWT令牌（可以包含或不包含Bearer前缀）
      * @param username 用户名
      * @return 如果令牌有效，则返回true；否则返回false
      */
     public Boolean validateToken(String token, String username) {
-        // 如果令牌以"Bearer "开头，则移除这个前缀
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
-
+        token = removeBearer(token);
         final String extractedUsername = extractUsername(token);
         return (extractedUsername.equals(username) && !isTokenExpired(token));
     }
@@ -163,6 +153,19 @@ public class JWTService {
     private Key getSigningKey() {
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    /**
+     * 移除Bearer前缀的工具方法
+     *
+     * @param token 可能包含Bearer前缀的token
+     * @return 移除Bearer前缀后的纯token
+     */
+    private String removeBearer(String token) {
+        if (token != null && token.startsWith("Bearer ")) {
+            return token.substring(7);
+        }
+        return token;
     }
 
 }
