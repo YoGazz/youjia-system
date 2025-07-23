@@ -42,7 +42,7 @@ public class WebSecurityConfig {
      * 这个方法配置了HTTP安全设置，包括JWT鉴权规则。
      *
      * 鉴权规则：
-     * - 不需要鉴权的接口：注册、登录、H2控制台
+     * - 不需要鉴权的接口：注册、登录、健康检测、监控端点、H2控制台、API文档
      * - 需要鉴权的接口：用户管理相关的所有其他接口
      *
      * @param http HttpSecurity对象，用于配置HTTP请求的安全性。
@@ -66,8 +66,17 @@ public class WebSecurityConfig {
                 // 允许访问认证相关接口（不需要登录）
                 .requestMatchers("/api/auth/**").permitAll()
 
+                // 允许访问健康检测接口（不需要登录）
+                .requestMatchers("/api/health/**").permitAll()
+
+                // 允许访问Spring Boot Actuator监控端点（不需要登录）
+                .requestMatchers("/actuator/**").permitAll()
+
                 // 允许访问H2数据库控制台（开发环境）
                 .requestMatchers("/h2-console/**").permitAll()
+
+                // 允许访问API文档相关接口（不需要登录）
+                .requestMatchers("/doc.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                 // 允许访问静态资源
                 .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
