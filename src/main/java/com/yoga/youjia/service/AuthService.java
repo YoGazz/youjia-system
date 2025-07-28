@@ -1,5 +1,7 @@
 package com.yoga.youjia.service;
 
+import com.yoga.youjia.common.enums.UserRole;
+import com.yoga.youjia.common.enums.UserStatus;
 import com.yoga.youjia.entity.User;
 import com.yoga.youjia.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,32 +15,16 @@ import org.springframework.stereotype.Service;
  * - 用户注册
  * - 用户登录
  * - 密码验证
- *
- * 为什么要单独创建AuthService？
- * 1. 职责分离：认证逻辑和用户管理逻辑分开
- * 2. 代码组织：让每个Service类的职责更加明确
- * 3. 便于维护：认证相关的功能集中管理
- * 4. 便于扩展：后续可以添加JWT、OAuth等认证方式
+ * 支持新的用户角色权限系统
  */
-@Service  // 告诉Spring这是一个服务类
+@Service
 public class AuthService {
 
-    /**
-     * 用户数据访问对象
-     *
-     * 用于操作用户数据，比如查询用户、保存用户等
-     */
-    @Autowired  // 让Spring自动注入UserRepository
+    @Autowired
     private UserRepository userRepository;
 
-    /**
-     * 密码加密器
-     *
-     * 用于加密用户密码，确保密码安全存储
-     */
-    @Autowired  // 让Spring自动注入PasswordEncoder
+    @Autowired
     private PasswordEncoder passwordEncoder;
-
 
     /**
      * 用户注册方法
@@ -65,19 +51,16 @@ public class AuthService {
         }
 
         // 第三步：加密密码
-        // 使用BCrypt加密算法对密码进行加密
-        // 加密后的密码无法被逆向解密，确保安全性
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // 第四步：设置用户默认信息
-        user.setStatus(User.Status.ENABLE.name());            // 存储枚举名称
-        user.setRole(User.Roles.DEVELOPER.getCode());         // 存储code
-        user.setCreatedAt(java.time.LocalDateTime.now());
-        // 如果realName不为空且不是空白字符串，去除首尾空格
+        user.setStatus(UserStatus.PENDING); // 新注册用户需要激活
+        user.setRole(UserRole.USER);         // 默认为普通用户
+        
+        // 处理真实姓名
         if (user.getRealName() != null && !user.getRealName().trim().isEmpty()) {
             user.setRealName(user.getRealName().trim());
         } else {
-            // 如果realName为空或空白，设置为null
             user.setRealName(null);
         }
 
@@ -90,13 +73,6 @@ public class AuthService {
      *
      * 验证用户的登录凭据（用户名和密码）
      *
-     * 登录流程：
-     * 1. 根据用户名查找用户
-     * 2. 检查用户是否存在
-     * 3. 验证密码是否正确
-     * 4. 检查用户状态是否为启用
-     * 5. 返回登录成功的用户信息
-     *
      * @param username 用户名
      * @param password 密码
      * @return User 登录成功的用户对象
@@ -105,7 +81,7 @@ public class AuthService {
     public User login(String username, String password) {
         // 第一步：根据用户名查找用户
         User user = userRepository.findByUsername(username)
-                .orElse(null);  // 如果找不到用户，返回null
+                .orElse(null);
 
         // 第二步：检查用户是否存在
         if (user == null) {
@@ -113,26 +89,47 @@ public class AuthService {
         }
 
         // 第三步：验证密码是否正确
-        // 使用BCrypt密码加密器验证密码
-        // passwordEncoder.matches()会将明文密码与数据库中的加密密码进行比较
         if (!passwordEncoder.matches(password, user.getPassword())) {
+            // 增加密码错误次数
+            user.incrementPasswordErrorCount();
+            userRepository.save(user);
             throw new IllegalArgumentException("用户名或密码错误");
         }
 
-        // 第四步：检查用户状态是否为启用
-        if (!User.Status.ENABLE.name().equals(user.getStatus())) {
-            throw new IllegalArgumentException("用户账户已被禁用");
+        // 第四步：检查用户状态
+        if (!user.canLogin()) {
+            String statusMessage = getStatusMessage(user.getStatus());
+            throw new IllegalArgumentException(statusMessage);
         }
 
-        // 第五步：返回登录成功的用户信息
-        // 注意：返回前应该清除密码信息，避免泄露
-        user.setPassword(null);  // 清除密码，不返回给前端
+        // 第五步：记录登录信息
+        user.recordLoginInfo(null); // TODO: 获取实际IP地址
+        userRepository.save(user);
+
+        // 第六步：返回登录成功的用户信息
+        user.setPassword(null); // 清除密码，不返回给前端
         return user;
     }
-
-    // TODO: 后续可以添加的功能
-    // - JWT令牌生成和验证（已在AuthController中实现）
-    // - 找回密码功能
-    // - 邮箱验证功能
-    // - 登录失败次数限制
+    
+    /**
+     * 获取用户状态对应的提示信息
+     */
+    private String getStatusMessage(UserStatus status) {
+        if (status == null) {
+            return "用户状态异常";
+        }
+        
+        switch (status) {
+            case INACTIVE:
+                return "用户账户已被停用";
+            case LOCKED:
+                return "用户账户已被锁定，请联系管理员";
+            case PENDING:
+                return "用户账户待激活，请联系管理员";
+            case DELETED:
+                return "用户账户已删除";
+            default:
+                return "用户账户状态异常";
+        }
+    }
 }

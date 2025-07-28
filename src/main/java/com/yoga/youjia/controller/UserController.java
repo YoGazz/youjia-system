@@ -1,6 +1,7 @@
 package com.yoga.youjia.controller;
 
 import com.yoga.youjia.common.ApiResponse;
+import com.yoga.youjia.common.enums.UserStatus;
 import com.yoga.youjia.common.exception.ResourceNotFoundException;
 import com.yoga.youjia.dto.request.UserQueryDTO;
 import com.yoga.youjia.dto.response.PageResponseDTO;
@@ -158,13 +159,15 @@ public class UserController {
                 .collect(Collectors.toList());
 
         // 构建分页响应
-        PageResponseDTO<UserResponseDTO> pageResponse = new PageResponseDTO<>(
-                userDTOs,
-                userPage.getTotalElements(),
-                userPage.getTotalPages(),
-                userPage.getNumber() + 1,
-                userPage.getSize()
-        );
+        PageResponseDTO<UserResponseDTO> pageResponse = PageResponseDTO.<UserResponseDTO>builder()
+                .content(userDTOs)
+                .page(userPage.getNumber())
+                .size(userPage.getSize())
+                .totalElements(userPage.getTotalElements())
+                .totalPages(userPage.getTotalPages())
+                .first(userPage.isFirst())
+                .last(userPage.isLast())
+                .build();
 
         logger.info("查询用户列表成功: 返回{}条记录，共{}页", 
                    userDTOs.size(), userPage.getTotalPages());
@@ -204,7 +207,15 @@ public class UserController {
             @RequestParam String status) {
         logger.info("更新用户状态: userId={}, status={}", userId, status);
         
-        User updatedUser = userService.updateUserStatus(userId, status);
+        // 将字符串状态转换为UserStatus枚举
+        UserStatus userStatus;
+        try {
+            userStatus = UserStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("无效的用户状态: " + status);
+        }
+        
+        User updatedUser = userService.updateUserStatus(userId, userStatus);
         UserResponseDTO userResponseDTO = UserResponseDTO.from(updatedUser);
         
         logger.info("更新用户状态成功: userId={}, status={}", userId, status);

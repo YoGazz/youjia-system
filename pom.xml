@@ -119,6 +119,14 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Spring Security 测试支持：提供安全相关的测试工具 -->
+        <!-- 包含@WithMockUser等测试注解，用于模拟用户认证 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- Spring Boot JPA启动器：提供JPA数据访问功能 -->
         <!-- 包含Hibernate ORM框架，简化数据库操作 -->
         <dependency>

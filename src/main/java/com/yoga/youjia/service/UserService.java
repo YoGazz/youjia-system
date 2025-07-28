@@ -1,5 +1,7 @@
 package com.yoga.youjia.service;
 
+import com.yoga.youjia.common.enums.UserStatus;
+import com.yoga.youjia.common.enums.UserRole;
 import com.yoga.youjia.common.exception.DataConflictException;
 import com.yoga.youjia.common.exception.ResourceNotFoundException;
 import com.yoga.youjia.dto.request.UserQueryDTO;
@@ -120,11 +122,32 @@ public class UserService {
                 Sort.by(Sort.Direction.DESC, "id")
         );
 
+        // 转换字符串参数为枚举
+        UserStatus statusEnum = null;
+        if (queryDTO.getStatus() != null && !queryDTO.getStatus().trim().isEmpty()) {
+            try {
+                statusEnum = UserStatus.fromCode(queryDTO.getStatus());
+            } catch (IllegalArgumentException e) {
+                // 如果无法解析状态，忽略该条件
+                logger.warn("无法解析用户状态: {}", queryDTO.getStatus());
+            }
+        }
+        
+        UserRole roleEnum = null;
+        if (queryDTO.getRole() != null && !queryDTO.getRole().trim().isEmpty()) {
+            try {
+                roleEnum = UserRole.fromCode(queryDTO.getRole());
+            } catch (IllegalArgumentException e) {
+                // 如果无法解析角色，忽略该条件
+                logger.warn("无法解析用户角色: {}", queryDTO.getRole());
+            }
+        }
+
         // 调用Repository的条件查询方法
         return userRepository.findByConditions(
                 queryDTO.getRealName(),
-                queryDTO.getStatus(),
-                queryDTO.getRole(),
+                statusEnum,
+                roleEnum,
                 pageRequest
         );
     }
@@ -188,7 +211,7 @@ public class UserService {
      * @throws ResourceNotFoundException 用户不存在时抛出
      */
     @Transactional
-    public User updateUserStatus(Long userId, String status) {
+    public User updateUserStatus(Long userId, UserStatus status) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("用户", String.valueOf(userId)));
         
