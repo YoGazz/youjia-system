@@ -1,6 +1,7 @@
 package com.yoga.youjia.controller;
 
 import com.yoga.youjia.common.ApiResponse;
+import com.yoga.youjia.common.enums.ErrorCode;
 import com.yoga.youjia.common.exception.BusinessException;
 import com.yoga.youjia.dto.request.LoginRequestDTO;
 import com.yoga.youjia.dto.request.RegisterRequestDTO;
@@ -54,7 +55,7 @@ public class AuthController {
         
         // 验证密码和确认密码是否一致
         if (!registerRequestDTO.getPassword().equals(registerRequestDTO.getConfirmPassword())) {
-            throw new BusinessException("400", "密码和确认密码不一致");
+            throw new BusinessException(ErrorCode.PASSWORD_NOT_MATCH);
         }
 
         // 创建用户对象

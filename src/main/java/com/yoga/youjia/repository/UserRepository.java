@@ -1,6 +1,8 @@
 package com.yoga.youjia.repository;
 
 import com.yoga.youjia.entity.User;
+import com.yoga.youjia.common.enums.UserStatus;
+import com.yoga.youjia.common.enums.UserRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -74,7 +76,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
            "(:role IS NULL OR u.role = :role)")
     Page<User> findByConditions(
             @Param("realName") String realName,
-            @Param("status") String status,
-            @Param("role") String role,
+            @Param("status") UserStatus status,
+            @Param("role") UserRole role,
             Pageable pageable);
 }
