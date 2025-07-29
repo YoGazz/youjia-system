@@ -54,9 +54,9 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // 第四步：设置用户默认信息
-        user.setStatus(UserStatus.PENDING); // 新注册用户需要激活
+        user.setStatus(UserStatus.ACTIVE); // 新注册用户需要激活
         user.setRole(UserRole.USER);         // 默认为普通用户
-        
+
         // 处理真实姓名
         if (user.getRealName() != null && !user.getRealName().trim().isEmpty()) {
             user.setRealName(user.getRealName().trim());
@@ -110,7 +110,7 @@ public class AuthService {
         user.setPassword(null); // 清除密码，不返回给前端
         return user;
     }
-    
+
     /**
      * 获取用户状态对应的提示信息
      */
@@ -118,7 +118,7 @@ public class AuthService {
         if (status == null) {
             return "用户状态异常";
         }
-        
+
         switch (status) {
             case INACTIVE:
                 return "用户账户已被停用";

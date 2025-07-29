@@ -55,8 +55,19 @@ public class WebSecurityConfig {
             // 禁用CSRF保护，因为我们使用JWT令牌
             .csrf(csrf -> csrf.disable())
 
-            // 禁用CORS，如果需要跨域可以单独配置
-            .cors(cors -> cors.disable())
+            // 启用CORS，使用WebMvcConfig中的配置
+            .cors(cors -> cors.configurationSource(request -> {
+                org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
+                configuration.setAllowedOrigins(java.util.Arrays.asList(
+                    "http://localhost:3000",
+                    "http://localhost:3001"
+                ));
+                configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
+                configuration.setAllowCredentials(true);
+                configuration.setMaxAge(3600L);
+                return configuration;
+            }))
 
             // 配置会话管理为无状态，因为我们使用JWT
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
